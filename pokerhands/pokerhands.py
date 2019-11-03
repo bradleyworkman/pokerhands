@@ -1,5 +1,7 @@
 import argparse
 
+from . import read, compare
+
 def main(args):
     def init():
         parser = argparse.ArgumentParser(
@@ -14,3 +16,9 @@ def main(args):
     # parse arguments
     args = init()
 
+    s = 0
+
+    for h1,h2 in read(args.file):
+        s += max(0, compare(h1, h2))
+
+    print(s)
