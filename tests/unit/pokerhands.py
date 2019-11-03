@@ -65,14 +65,14 @@ class TestClassification(unittest.TestCase):
 
         for c in cases:
             c = classify(_parse_hand(c))
-            self.assertEqual(constants.hands.THREE_OF_A_KIND, c[0])
+            self.assertEqual(constants.hands.STRAIGHT, c[0])
 
     def test_flush(self):
         cases = ["2D 3D 8D TD 6D","AC 8C 2C 4C JC"]
 
         for c in cases:
             c = classify(_parse_hand(c))
-            self.assertEqual(constants.hands.THREE_OF_A_KIND, c[0])
+            self.assertEqual(constants.hands.FLUSH, c[0])
 
     def test_full_house(self):
         cases = ["3H 3D 3C KC KS","4H 4C 4S JC JS"]
@@ -86,21 +86,21 @@ class TestClassification(unittest.TestCase):
 
         for c in cases:
             c = classify(_parse_hand(c))
-            self.assertEqual(constants.hands.THREE_OF_A_KIND, c[0])
+            self.assertEqual(constants.hands.FOUR_OF_A_KIND, c[0])
 
     def test_straight_flush(self):
-        cases = ["2D 3D 4D 5D 6D","AS KS QS JS TS"]
+        cases = ["2D 3D 4D 5D 6D","KS QS JS TS 9S"]
 
         for c in cases:
             c = classify(_parse_hand(c))
-            self.assertEqual(constants.hands.THREE_OF_A_KIND, c[0])
+            self.assertEqual(constants.hands.STRAIGHT_FLUSH, c[0])
 
     def test_royal_flush(self):
         cases = ["AS KS QS JS TS", "AD TD KD JD QD"]
 
         for c in cases:
             c = classify(_parse_hand(c))
-            self.assertEqual(constants.hands.THREE_OF_A_KIND, c[0])
+            self.assertEqual(constants.hands.ROYAL_FLUSH, c[0])
 
 class TestHandComparison(unittest.TestCase):
     def test_less_than(self):
