@@ -50,8 +50,16 @@ def compare(hand1, hand2):
         hand1 > hand2
 
     """
+    class1 = classify(hand1)
+    class2 = classify(hand2)
 
-    raise NotImplementedError()
+    for i in range(len(class1)):
+        if class1[i] > class2[i]:
+            return 1
+        elif class1[i] < class2[i]:
+            return -1
+
+    return 0
 
 def parse_hands(line):
     """
