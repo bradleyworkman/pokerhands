@@ -1,4 +1,4 @@
-import argparse
+import sys, argparse
 
 from . import read, compare
 
@@ -16,9 +16,15 @@ def main(args):
     # parse arguments
     args = init()
 
+    # sum of plays where hand1 > hand2
     s = 0
 
     for h1,h2 in read(args.file):
+
+        # ignore returns of -1 where h1 < h2
         s += max(0, compare(h1, h2))
 
     print(s)
+
+if __name__ == '__main__':
+    main(sys.argv)
