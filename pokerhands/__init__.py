@@ -4,6 +4,26 @@ from .constants import constants
 
 Card = namedtuple("Card", "rank suit")
 
+def classify(hand):
+    """
+    Classifies and sorts hand
+
+    Determines hand type and sorts hand in ranking by poker rules
+    ex. "2H 3D 4C 5D 6H" will return (constants.hands.STRAIGHT, 6, 5, 4, 3, 2)
+
+    Parameters
+    ----------
+    hand : tuple
+        contains 5 cards
+
+    Returns
+    -------
+    tuple
+        [0] is hand type, [1:6] is hand sorted in decending value order depending on type
+    """
+
+    raise NotImplementedError()
+
 def compare(hand1, hand2):
     """
     Compares hand1 to hand2
