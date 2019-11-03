@@ -1,8 +1,38 @@
-from collections import namedtuple
+from collections import namedtuple, defaultdict, deque
 
 from .constants import constants
 
 Card = namedtuple("Card", "rank suit")
+
+def rank(card):
+    if '1' <= card.rank <= '9':
+        return ord(card.rank) - ord('0')
+
+    return {
+        "T": constants.ranks.TEN,
+        "J": constants.ranks.JACK,
+        "Q": constants.ranks.QUEEN,
+        "K": constants.ranks.KING,
+        "A": constants.ranks.ACE       
+    }[card.rank]
+
+def ranked(hand):
+    return [rank(c) for c in hand]
+
+def bucket_sort(hand):
+    buckets = defaultdict(list)
+
+    for card in hand:
+        buckets[rank(card)].append(card)
+
+    return buckets
+
+def max_bucket_len(buckets):
+    m = 1
+    for k,v in buckets.items():
+        m = max(m, len(v))
+
+    return m
 
 def classify(hand):
     """
@@ -21,8 +51,142 @@ def classify(hand):
     tuple
         [0] is hand type, [1:6] is hand sorted in decending value order depending on type
     """
+    def ordered(hand):
+        return list(sorted(ranked(hand), reverse=True))
 
-    raise NotImplementedError()
+    def ordered_four_of_a_kind(hand):
+        d = deque()
+
+        for rank,bucket in bucket_sort(hand).items():
+            if len(bucket) == 4:
+                d.extendleft(ranked(bucket))
+            else:
+                d.extend(ranked(bucket))
+
+        return list(d)
+
+    def ordered_full_house(hand):
+        d = deque()
+
+        for rank,bucket in bucket_sort(hand).items():
+            if len(bucket) == 3:
+                d.extendleft(ranked(bucket))
+            else:
+                d.extend(ranked(bucket))
+
+        return list(d)
+
+    def ordered_three_of_a_kind(hand):
+        d = deque()
+        others = list()
+
+        for rank,bucket in bucket_sort(hand).items():
+            if len(bucket) == 3:
+                d.extendleft(ranked(bucket))
+            else:
+                others.extend(bucket)
+
+        d.extend(ordered(others))
+
+        return list(d)
+
+    def ordered_two_pair(hand):
+        d = deque()
+        outsider = None
+
+        for rank,bucket in bucket_sort(hand).items():
+            if len(bucket) == 2:
+                d.extendleft(ranked(bucket))
+            else:
+                outsider = rank
+
+        d = sorted(d, reverse=True)
+        d.append(outsider)
+
+        return list(d)
+
+    def ordered_one_pair(hand):
+        d = deque()
+        others = list()
+
+        for rank,bucket in bucket_sort(hand).items():
+            if len(bucket) == 2:
+                d.extendleft(ranked(bucket))
+            else:
+                others.extend(bucket)
+
+        d.extend(ordered(others))
+
+        return list(d)
+
+    def is_one_pair(hand):
+        buckets = bucket_sort(hand)
+        return len(buckets.keys()) == 4
+
+    def is_two_pair(hand):
+        buckets = bucket_sort(hand)
+
+        return len(buckets.keys()) == 3 and max_bucket_len(buckets) == 2
+
+    def is_three_of_a_kind(hand):
+        buckets = bucket_sort(hand)
+
+        m = 1
+        for k,v in buckets.items():
+            m = max(m, len(v))
+
+        return len(buckets.keys()) == 3 and max_bucket_len(buckets) == 3
+
+    def is_straight(hand):
+        l = sorted(ranked(hand))
+
+        for i in range(1, len(l)):
+            if l[i] - l[i-1] != 1: return False
+
+        return True
+
+    def is_flush(hand):
+        s = hand[0].suit
+
+        for card in hand[1:]:
+            if card.suit != s: return False
+
+        return True
+
+    def is_full_house(hand):
+        buckets = bucket_sort(hand)
+        return len(buckets.keys()) == 2 and max_bucket_len(buckets) == 3
+
+    def is_four_of_a_kind(hand):
+        buckets = bucket_sort(hand)
+        return len(buckets.keys()) == 2 and max_bucket_len(buckets) == 4
+
+    def is_straight_flush(hand):
+        return is_straight(hand) and is_flush(hand)
+
+    def is_royal_flush(hand):
+        return is_straight_flush(hand) and constants.ranks.ACE in ranked(hand)
+
+    if is_royal_flush(hand):
+        return tuple([constants.hands.ROYAL_FLUSH] + ordered(hand))
+    elif is_straight_flush(hand):
+        return tuple([constants.hands.STRAIGHT_FLUSH] + ordered(hand))
+    elif is_four_of_a_kind(hand):
+        return tuple([constants.hands.FOUR_OF_A_KIND] + ordered_four_of_a_kind(hand))
+    elif is_full_house(hand):
+        return tuple([constants.hands.FULL_HOUSE] + ordered_full_house(hand))
+    elif is_flush(hand):
+        return tuple([constants.hands.FLUSH] + ordered(hand))
+    elif is_straight(hand):
+        return tuple([constants.hands.STRAIGHT] + ordered(hand))
+    elif is_three_of_a_kind(hand):
+        return tuple([constants.hands.THREE_OF_A_KIND] + ordered_three_of_a_kind(hand))
+    elif is_two_pair(hand):
+        return tuple([constants.hands.TWO_PAIR] + ordered_two_pair(hand))
+    elif is_one_pair(hand):
+        return tuple([constants.hands.ONE_PAIR] + ordered_one_pair(hand))
+    else:
+        return tuple([constants.hands.HIGH_CARD] + ordered(hand))
 
 def compare(hand1, hand2):
     """
