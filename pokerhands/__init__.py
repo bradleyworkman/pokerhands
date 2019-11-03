@@ -5,6 +5,19 @@ from .constants import constants
 Card = namedtuple("Card", "rank suit")
 
 def rank(card):
+    """
+    Ranks a card numerically
+
+    Parameters
+    ----------
+    card : Card
+        contains a rank and a suit member
+
+    Returns
+    -------
+    integer
+        numeric rank of a card given its string rank
+    """
     if '1' <= card.rank <= '9':
         return ord(card.rank) - ord('0')
 
@@ -17,9 +30,37 @@ def rank(card):
     }[card.rank]
 
 def ranked(hand):
+    """
+    Maps rank function to hand
+
+    Parameters
+    ----------
+    hand : tuple
+        contains 5 cards
+
+    Returns
+    -------
+    list
+        map of rank() to hand
+    """
+
     return [rank(c) for c in hand]
 
 def bucket_sort(hand):
+    """
+    Sorts cards in a hand into rank buckets
+
+    Parameters
+    ----------
+    hand : tuple
+        contains 5 cards
+
+    Returns
+    -------
+    dict
+        A dictionary mapping rank to list of cards
+    """
+
     buckets = defaultdict(list)
 
     for card in hand:
@@ -28,6 +69,19 @@ def bucket_sort(hand):
     return buckets
 
 def max_bucket_len(buckets):
+    """
+    Finds the maximum length of a bucket in buckets (dict as returned by bucket_sort)
+
+    Parameters
+    ----------
+    buckets : dict
+        contains a map of ranks to list of cards
+
+    Returns
+    -------
+    integer
+        length of the longest bucket in buckets
+    """
     m = 1
     for k,v in buckets.items():
         m = max(m, len(v))
